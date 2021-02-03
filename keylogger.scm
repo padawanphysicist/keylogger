@@ -6,7 +6,7 @@
  (system foreign-object))
 
 ;; Create handler for libinput
-(define libinput (dynamic-link "klogger.so"))
+(define libinput (dynamic-link "input.so"))
 
 (define* (get bv #:optional (type 'code))
   (let* ((fn (format #f "get_~a" type))
@@ -19,9 +19,9 @@
 (call-with-input-file 
     "/dev/input/event22"
   (lambda (port)
-    (define code 0)
     (let* ((nbytes 24)
-	   (bv (make-bytevector nbytes)))
+	   (bv (make-bytevector nbytes))
+	   (code 0))
       (while (not (= 1 code))
 	(get-bytevector-n! port bv 0 nbytes)
 	(set! code (get bv))
