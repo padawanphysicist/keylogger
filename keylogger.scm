@@ -70,8 +70,3 @@ keylogger [options] --input <device>
         (if help-wanted?
             (display-help)        
             (keylog (option-ref options 'input #f) (option-ref options 'output #f))))))
-
-
-
-
-
