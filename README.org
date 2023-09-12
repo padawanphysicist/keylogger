@@ -1,12 +1,40 @@
 #+title: Keylogger
 
-With so many event files, how can one possibly know which one corresponds to which? This command is what you need:
-#+begin_src sh
-cat /proc/bus/input/devices
-#+end_src
-It will display relevant information about all the input devices connected to your system. Find your keyboard and look for the field =Handlers=.
+Very simple keylogger, written in [[https://www.gnu.org/software/guile/][Guile Scheme]].
 
-Then use
+* Dependencies
+
+- [[https://www.gnu.org/software/guile/][Guile Scheme]]
+- [[https://www.gnu.org/software/make/][GNU Make]]
+
+* Build shared library
+
+This keylogger relies on a shared library written in C; to compile it, use the command
 #+begin_src sh
-sudo LD_LIBRARY_PATH=./ GUILE_LOAD_PATH=./ /home/vct/.local/bin/guile -e main -s keylogger.scm -i /dev/input/event4 -o $(date +"%Y-%m-%d")-keylog.txt
+make
+#+end_src
+
+* Finding your keyboard device
+
+With so many event files, how can one possibly know which one corresponds to which? You can find it with this command:
+#+begin_src sh :results raw
+grep -iE -A4 'N: Name=' /proc/bus/input/devices | grep -i -A4 'keyboard' | grep -v "^[PSU]"
+#+end_src
+
+#+RESULTS:
+N: Name="AT Translated Set 2 keyboard"
+H: Handlers=sysrq kbd leds event4
+
+You should look at the field =Handlers=. In this case, the keyboard device will be =/dev/input/event4=.
+
+* Running the keylogger
+
+With the keyboard device name, run the command
+#+begin_src sh
+sudo LD_LIBRARY_PATH=./ GUILE_LOAD_PATH=./ guile -e main -s keylogger.scm -i /dev/input/event4 -o keylog.txt
+#+end_src
+
+and in the other terminal follow it with:
+#+begin_src sh
+tail --follow keylog.txt
 #+end_src
