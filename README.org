@@ -1,0 +1,12 @@
+#+title: Keylogger
+
+With so many event files, how can one possibly know which one corresponds to which? This command is what you need:
+#+begin_src sh
+cat /proc/bus/input/devices
+#+end_src
+It will display relevant information about all the input devices connected to your system. Find your keyboard and look for the field =Handlers=.
+
+Then use
+#+begin_src sh
+sudo LD_LIBRARY_PATH=./ GUILE_LOAD_PATH=./ /home/vct/.local/bin/guile -e main -s keylogger.scm -i /dev/input/event4 -o $(date +"%Y-%m-%d")-keylog.txt
+#+end_src
