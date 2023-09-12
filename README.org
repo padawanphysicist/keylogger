@@ -21,11 +21,10 @@ With so many event files, how can one possibly know which one corresponds to whi
 grep -iE -A4 'N: Name=' /proc/bus/input/devices | grep -i -A4 'keyboard' | grep -v "^[PSU]"
 #+end_src
 
+The output will be something like
 #+RESULTS:
 : N: Name="AT Translated Set 2 keyboard"
 : H: Handlers=sysrq kbd leds event4 
-
-
 
 You should look at the field =Handlers=. In this case, the keyboard device will be =/dev/input/event4=.
 
