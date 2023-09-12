@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-PROJECT_DIR="/home/vct/Documents/keylogger"
-GUILE_BIN="/home/vct/.local/bin/guile"
-
-LD_LIBRARY_PATH="${PROJECT_DIR}" \
-GUILE_LOAD_PATH="${PROJECT_DIR}" \
-GUILE_LIBRARY_PATH="${PROJECT_DIR}" \
-"${GUILE_BIN}" -e main -s keylogger.scm "$@"
